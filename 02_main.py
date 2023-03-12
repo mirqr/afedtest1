@@ -96,12 +96,13 @@ if __name__ == "__main__":
     devs = []
     for name, data, in datasets.items():
         #print(name,dataset_name)
-        x = data.iloc[:, :28*28]
+        x = data.iloc[:, :n_features]
         y_class = data['y_class']
         devs = devs + [Dev(name, dataset_name, x, y_class)]
 
     
 
-    get_model(devs, start, end,True)
-    #broad(devs, start, end,True)
+
+    #get_model(devs, start, end,True)
+    broad(devs, start, end,True)
     
