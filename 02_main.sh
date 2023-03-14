@@ -4,7 +4,7 @@ p=9
 k=10
 m=$((p*k))
 
-step=9
+step=6
 for i in $(seq $step $step $m)
 do
     echo "Welcome $((i-$step)) $i  times"

@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # config
     dataset_name = "mnist"
     dataset_name = "fashion_mnist"
-    dataset_name = "kminst"
+    #dataset_name = "kminst"
     outlier_fraction = 0.1
 
 
