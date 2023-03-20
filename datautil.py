@@ -154,13 +154,13 @@ def in_range(x, ref, range_perc):
 # situazione di prima, = 9
 
 
-def partition(x, y, num_nodes_per_class=20, outlier_fraction=0.1):
+def partition(x, y, num_nodes_per_class=20, outlier_fraction=0.1, random_state=42):
     df = pd.DataFrame(x)
     df["y_class"] = y
     class_list = list(np.unique(y))
     num_class = len(class_list)
-
-    m1 = df.sample(frac=1.0 - outlier_fraction, random_state=42)
+    
+    m1 = df.sample(frac=1.0 - outlier_fraction, random_state=random_state)
     m2 = df.drop(m1.index)
     # m1['y_class'].value_counts().plot.bar()
     # m2['y_class'].value_counts().plot.bar()
@@ -170,9 +170,9 @@ def partition(x, y, num_nodes_per_class=20, outlier_fraction=0.1):
     for c in range(0, num_class):
         # inlier[0] dizionario: 20 split della classe 0
         inlier[c] = np.array_split(
-            m1.loc[df["y_class"] == c], num_nodes_per_class)
+            m1.loc[m1["y_class"] == c], num_nodes_per_class)
         out[c] = np.array_split(
-            m2.loc[df["y_class"] == c], num_nodes_per_class)
+            m2.loc[m2["y_class"] == c], num_nodes_per_class)
 
     div = num_nodes_per_class // (num_class - 1)
     rem = num_nodes_per_class % (num_class - 1)
@@ -190,9 +190,8 @@ def partition(x, y, num_nodes_per_class=20, outlier_fraction=0.1):
                     # split_out = out[c_out].pop(0)
 
                     dd = pd.concat([inlier[c_in].pop(0), out[c_out].pop(0)])
-                    dd["y_out"] = dd["y_class"].apply(
-                        lambda x: 0 if x == c_in else 1)
-                    dd = dd.sample(frac=1, random_state=42)
+                    dd["y_out"] = dd["y_class"].apply(lambda x: 0 if x == c_in else 1)
+                    dd = dd.sample(frac=1, random_state=random_state) #shuffle
                     key = str(c_in) + "_" + str(count)
                     datasets[key] = dd
                     count += 1
@@ -206,10 +205,48 @@ def partition(x, y, num_nodes_per_class=20, outlier_fraction=0.1):
 
             dd = pd.concat([inlier[c_in].pop(0), out[c_out].pop(0)])
             dd["y_out"] = dd["y_class"].apply(lambda x: 0 if x == c_in else 1)
-            dd = dd.sample(frac=1, random_state=42)
+            dd = dd.sample(frac=1, random_state=random_state) #shuffle
             key = str(c_in) + "_" + str(count)
             datasets[key] = dd
             count += 1
     return datasets
 
 
+def partition2(x, y, num_nodes_per_class=20, outlier_fraction=0.1,  random_state=42):
+    df = pd.DataFrame(x)
+    df["y_class"] = y
+    class_list = list(np.unique(y))
+    num_class = len(class_list)
+
+    m1 = df.sample(frac = 1.0 - outlier_fraction, random_state=random_state)
+    m2 = df.drop(m1.index)
+    #m1['y_class'].value_counts().plot.bar()
+    #m2['y_class'].value_counts().plot.bar()
+    inlier = {}
+    
+    datasets = {}
+    for c in range(0, num_class):
+        # inlier[0] list: num_nodes_per_class (es 9) split della classe 0
+        inlier[c] = np.array_split(m1.loc[m1["y_class"] == c], num_nodes_per_class)
+
+    for c in range(0, num_class):
+        for j in range(0, num_nodes_per_class):
+            key = str(c) + "_" + str(j)
+            #print(key)
+            ii = inlier[c].pop(0)
+            n_ii = len(ii)
+            n_oo = round(outlier_fraction * (n_ii / (1-outlier_fraction)))
+            #print('leng',len(oo),len(ii))
+            try:
+                oo = m2.loc[m2["y_class"] != c].sample(n = n_oo, random_state=random_state)
+            except ValueError:
+                print("request, remaining",len(oo),len(m2.loc[m2["y_class"] != c]))
+                oo = m2.loc[m2["y_class"] != c].sample(frac=1,random_state=random_state) # prendili tutti
+            m2=m2.drop(oo.index)
+            len(m2)
+            dd = pd.concat([ii, oo])
+            dd = dd.sample(frac=1, random_state=random_state) #shuffle
+            #len(out[c])
+            dd["y_out"] = dd["y_class"].apply(lambda x: 0 if x == c else 1)
+            datasets[key] = dd
+    return datasets
