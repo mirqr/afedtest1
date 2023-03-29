@@ -220,7 +220,7 @@ def partition2(x, y, num_nodes_per_class=20, outlier_fraction=0.1,  random_state
     num_class = len(class_list)
 
     m1 = df.sample(frac = 1.0 - outlier_fraction, random_state=random_state)
-    m2 = df.drop(m1.index)
+    m2 = df.drop(m1.index).copy()
     #m1['y_class'].value_counts().plot.bar()
     #m2['y_class'].value_counts().plot.bar()
     inlier = {}

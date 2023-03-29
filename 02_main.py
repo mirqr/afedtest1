@@ -67,6 +67,19 @@ def broad(devs, start, end, reset=False):
 
 
 if __name__ == "__main__":
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    if gpus:
+        # Restrict TensorFlow to only use the first GPU
+        try:
+            import subprocess
+            import random
+            num_gpu = str(subprocess.check_output(["nvidia-smi", "-L"])).count('UUID')
+            n = random.randint(0, num_gpu-1)
+            tf.config.experimental.set_visible_devices(gpus[n], 'GPU')
+        except RuntimeError as e:
+            # Visible devices must be set at program startup
+            print(e)
+    
     args = sys.argv[1:]
     start = int(args[0])
     end = int(args[1])
@@ -108,3 +121,4 @@ if __name__ == "__main__":
         get_model(devs, start, end,True)
     else:
         broad(devs, start, end,True)
+    
