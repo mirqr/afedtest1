@@ -167,6 +167,26 @@ class AutoEncoderCustom(BaseDetector):
                         include_left=True)
 
 
+    def _build_model4(self):
+        model = Sequential([
+        Input(shape=(28*28)),
+        Reshape((28, 28,1)),
+        Conv2D(32, (3, 3), activation="relu", padding="same"),
+        MaxPooling2D((2, 2), padding="same"),
+        Conv2D(32, (3, 3), activation="relu", padding="same"),
+        MaxPooling2D((2, 2), padding="same"),
+        Conv2DTranspose(32, (3, 3), strides=2, activation="relu", padding="same"),
+        Conv2DTranspose(32, (3, 3), strides=2, activation="relu", padding="same"),
+        Conv2D(1, (3, 3), activation="sigmoid", padding="same"),
+        Flatten()
+    ])
+        model.compile(loss=self.loss, optimizer=self.optimizer)
+
+        if self.verbose >= 1:
+            print(model.summary())
+        return model
+
+
     def _build_model3(self):
         model = Sequential([
         Input(shape=(28*28)),
@@ -319,7 +339,7 @@ class AutoEncoderCustom(BaseDetector):
         self.compression_rate_ = self.n_features_ // self.encoding_dim_
 
         # Build AE model & fit with X
-        self.model_ = self._build_model()
+        self.model_ = self._build_model4()
         self.history_ = self.model_.fit(X_norm, X_norm,
                                         epochs=self.epochs,
                                         batch_size=self.batch_size,

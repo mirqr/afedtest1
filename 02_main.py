@@ -52,9 +52,9 @@ def get_dataset(dataset_name: str):
 def get_model(devs, start, end, reset=False):
     for dev in devs[start:end]:
         dev.model_fit(
-            OCSVM(contamination=outlier_fraction,cache_size=1000),
+            #OCSVM(contamination=outlier_fraction,cache_size=1000),
             #AutoEncoder(contamination=outlier_fraction, hidden_neurons = [16, 8, 16], dropout_rate=0.1, verbose=1, preprocessing=False),
-            #AutoEncoderCustom(contamination=outlier_fraction, hidden_neurons = [16, 8, 16], dropout_rate=0.1, verbose=0, preprocessing=False),
+            AutoEncoderCustom(contamination=outlier_fraction, hidden_neurons = [16, 8, 16], dropout_rate=0.1, verbose=0, preprocessing=False),
             num_nodes_per_class=num_nodes_per_class,reset=reset)
 
 def broad(devs, start, end, reset=False):
@@ -70,6 +70,8 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     start = int(args[0])
     end = int(args[1])
+    first_step = int(args[2])
+    
     print('start',start,'end',end)
     # config
     dataset_name = "mnist"
@@ -91,7 +93,7 @@ if __name__ == "__main__":
     print(x_test.shape)
 
     # dict of dataset, key is client name 
-    datasets = partition2(x_train,y_train,num_nodes_per_class, outlier_fraction)
+    datasets = partition(x_train,y_train,num_nodes_per_class, outlier_fraction)
 
     devs = []
     for name, data, in datasets.items():
@@ -102,7 +104,7 @@ if __name__ == "__main__":
 
     
 
-
-    #get_model(devs, start, end,True)
-    broad(devs, start, end,True)
-    
+    if first_step:
+        get_model(devs, start, end,True)
+    else:
+        broad(devs, start, end,True)

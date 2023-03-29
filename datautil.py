@@ -1,3 +1,4 @@
+from math import floor
 import os
 
 import numpy as np
@@ -235,7 +236,7 @@ def partition2(x, y, num_nodes_per_class=20, outlier_fraction=0.1,  random_state
             #print(key)
             ii = inlier[c].pop(0)
             n_ii = len(ii)
-            n_oo = round(outlier_fraction * (n_ii / (1-outlier_fraction)))
+            n_oo = floor(outlier_fraction * (n_ii / (1-outlier_fraction)))
             #print('leng',len(oo),len(ii))
             try:
                 oo = m2.loc[m2["y_class"] != c].sample(n = n_oo, random_state=random_state)
